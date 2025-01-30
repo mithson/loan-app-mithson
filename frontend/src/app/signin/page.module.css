@@ -1,0 +1,162 @@
+/* 
+.formContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f1f1f1;
+} */
+
+.forms {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* width: 40vw; */
+    /* box-shadow: 0 3px 6px #0000005c; */
+    box-sizing: border-box;
+    background-color: #f1f1f1;
+    /* border: 1px solid black; */
+    /* min-width: vw; */
+    border-radius: 10px;
+    /* padding: 20px; */
+}
+
+
+.formsgrid {
+    -webkit-box-sizing: border-box;
+    /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;
+    /* Firefox, other Gecko */
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+    box-shadow: 0 3px 6px #0000005c;
+    border: 1px solid black;
+    text-align: left;
+
+}
+
+.passwordInput {
+    /* position: relative; */
+}
+
+.showPasswordBtn {
+    position: absolute;
+    right: 10px;
+    z-index: 1;
+    /* background-color: transparent; */
+    /* border: none */
+}
+
+.textArea {
+    /* max-width: 250px; */
+    min-width: 100px;
+    width: 100px;
+    max-height: 250px;
+    min-height: 100px;
+}
+
+.formStructure {
+    margin-top: 20px;
+}
+
+
+.emailInput {
+    flex-grow: 1;
+    margin: 10px 0px;
+    min-width: 100px;
+    padding: 10px;
+    border-radius: 3px;
+}
+
+.btnInCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
+
+.submitBtn,
+.nextBtn,
+.prevBtn {
+    background-color: #FFFFFF;
+    border: 1px solid #222222;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #222222;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 600;
+    /* line-height: 20px; */
+    margin: 0;
+    outline: none;
+    padding: 11px 23px;
+    /* position: relative; */
+    text-align: center;
+    text-decoration: none;
+    touch-action: manipulation;
+    transition: box-shadow .2s, -ms-transform .1s, -webkit-transform .1s, transform .1s;
+    user-select: none;
+    -webkit-user-select: none;
+    width: auto;
+}
+
+.submitBtn:hover,
+.nextBtn:hover,
+.prevBtn:hover {
+    /* background-color: black; */
+    transition: ease-in-out;
+    /* color: white; */
+}
+
+.select {
+    padding: 15px 25px;
+    border-radius: 5px;
+}
+
+.BtnGroup {
+    display: flex;
+    justify-content: space-between;
+    column-gap: 30px;
+    margin-top: 20px;
+}
+
+.rememberMe {
+    margin: 10px 0px;
+    padding: 10px 0px;
+}
+
+.step {
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbbbbb;
+    border: none;
+    border-radius: 50%;
+    display: inline-block;
+    opacity: 0.5;
+}
+
+.activeBtn {
+    background-color: red;
+}
+
+.step.active {
+    opacity: 1;
+}
+
+/* Mark the steps that are finished and valid: */
+.step.finish {
+    background-color: #04AA6D;
+}
+
+/* signin mobile */
+@media all and (max-width: 768px) {
+    .forms {
+        min-width: 80%;
+        min-height: 55%;
+    }
+}
