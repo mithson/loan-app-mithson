@@ -329,7 +329,7 @@ const MultiStepForm: React.FC = () => {
                   )}
                   {step === steps.length - 1 && (
                     <Button onClick={() => {
-                      router.push("/signin")
+                      router.push("/showall")
                     }} variant="outline" type="submit">
                       Submit
                     </Button>
