@@ -25,16 +25,17 @@ import dbConnect from '@/lib/dbConnect';
 const formSchema = z.object({
   email: z.string().email('Invalid Email Please enter valid email'),
   password: z.string().min(8),
-  confirmPassword: z.string().min(8),
-}).superRefine(({ confirmPassword, password }, ctx) => {
-  if (confirmPassword !== password) {
-    ctx.addIssue({
-      code: "custom",
-      message: "The passwords did not match",
-      path: ['confirmPassword']
-    });
-  }
-});
+  // confirmPassword: z.string().min(8),
+})
+// .superRefine(({ confirmPassword, password }, ctx) => {
+//   if (confirmPassword !== password) {
+//     ctx.addIssue({
+//       code: "custom",
+//       message: "The passwords did not match",
+//       path: ['confirmPassword']
+//     });
+//   }
+// });
 // https://stackoverflow.com/questions/73695535/how-to-check-confirm-password-with-zod
 
 type FormValues = z.infer<typeof formSchema>;
@@ -71,7 +72,7 @@ const LoginPage: React.FC =  () => {
     defaultValues: {
       email: "",
       password: "",
-      confirmPassword: ""
+      // confirmPassword: ""
     }
   })
   const onSubmit = async (data: { email: string; password: string; }) => {
@@ -99,10 +100,10 @@ const LoginPage: React.FC =  () => {
   };
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
-  const toggleConfirmPasswordVisibility = () =>
-    setShowConfirmPassword((prev) => !prev);
+  // const toggleConfirmPasswordVisibility = () =>
+  //   setShowConfirmPassword((prev) => !prev);
 
   return (
       <div className={styles.forms}>
@@ -155,7 +156,7 @@ const LoginPage: React.FC =  () => {
         )}
       />
 
-      <FormField
+      {/* <FormField
         name="confirmPassword"
         control={methods.control}
         render={({ field }) => (
@@ -183,7 +184,7 @@ const LoginPage: React.FC =  () => {
             <FormMessage />
           </FormItem>
         )}
-      />
+      /> */}
             <div className="flex justify-between mt-3">
             <p className='text-sm flex items-center align-bottom'>Register anonymously</p>
             <button className='underline whitespace-nowrap font-bold' onClick={ ()=> { 
