@@ -1,97 +1,202 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-// import { testDatabaseConnection } from '../../frontend/src/lib/crud';
+import { FormDatas } from "../model/User.js"
+import userSchema from "../model/User.js"
+import { dbConnect } from "./dbConnect.js"
+import mongoose from 'mongoose';
+
+import dotenv from "dotenv";
+dotenv.config();
+
+type User = {
+  personalDetails: PersonalDetails
+  employmentDetails: EmploymentDetails
+  otherDetails: OtherDetails
+}
+
+
+type PersonalDetails = {
+  name: String
+  email: String
+  phone: String
+}
+
+type EmploymentDetails = {
+  employerName: String
+  income: number
+  position: String
+}
+
+type OtherDetails = {
+  pan: String
+  aadhaar: String
+  comments: String
+}
+
 
 // Define the GraphQL schema
 const typeDefs = `#graphql
   type User {
-    id: Int!
-    name: String!
-    loanAmount: Int!
-    status: String!
+    id: ID
+    personalDetails: PersonalDetails
+    employmentDetails: EmploymentDetails
+    otherDetails: OtherDetails
+  }
+  
+
+  type PersonalDetails {
+    name: String
+    email: String
+    phone: String
+  }
+
+  type EmploymentDetails {
+    employerName: String
+    income: Float
+    position: String
+  }
+
+  type OtherDetails {
+    pan: String
+    aadhaar: String
+    comments: String
   }
 
   type Query {
-    getUsers: [User!]!
-    getUser(id: Int!): User
+    getAllUsers: [User]
+    getUser(id: ID): User
   }
-
+   
   type Mutation {
-    addUser(name: String!, loanAmount: Int!, status: String!): User
-    updateUser(id: Int!, name: String, loanAmount: Int, status: String): User
-    deleteUser(id: Int!): Boolean
+    deleteUser(id: ID): User,
+    updateUser(id: ID!, input: UpdateUserInput): User
+    addUser(input: addUserInput!): User
   }
-`;
 
-// Mock data
-let users = [
-  { id: 1, name: 'MithsonAbhi', loanAmount: 5000, status: 'Approved' },
-  { id: 2, name: 'Aman Rajbhar', loanAmount: 3000, status: 'Pending' },
-  { id: 3, name: 'Raj.', loanAmount: 7000, status: 'Rejected' },
-  { id: 4, name: 'Sandy P', loanAmount: 3000, status: 'Pending' },
-];
+ input addUserInput {
+  personalDetails: PersonalDetailsInput
+  employmentDetails: EmploymentDetailsInput
+  otherDetails: OtherDetailsInput
+}
+
+  input UpdateUserInput {
+  personalDetails: PersonalDetailsInput
+  employmentDetails: EmploymentDetailsInput
+  otherDetails: OtherDetailsInput
+}
+
+input PersonalDetailsInput {
+  name: String
+  email: String
+  phone: String
+}
+
+input EmploymentDetailsInput {
+  employerName: String
+  income: Float
+  position: String
+}
+
+input OtherDetailsInput {
+  pan: String
+  aadhaar: String
+  comments: String
+}
+`;
 
 // Define resolvers
 const resolvers = {
   Query: {
-    getUsers: () => users,
-    getUser: (_, { id }) => users.find((user) => user.id === id),
+    getAllUsers: async () => {
+      try {
+        return await FormDatas.find(); // Fetch all users
+      } catch (error: any) {
+        throw new Error(error.message);
+      }
+    },
+    getUser: async (_: unknown, id: string) => {
+      try {
+        const user = await FormDatas.findById(new mongoose.Types.ObjectId(id));
+        if (!user) {
+          throw new Error("User not found FROM Mithson Backend");
+        }
+        return user;
+      } catch (error: any) {
+        throw new Error(error.message);
+      }
+    },
   },
   Mutation: {
-    addUser: (_, { name, loanAmount, status }) => {
-      const newUser = {
-        id: users.length > 0 ? users[users.length - 1].id + 1 : 1,
-        name,
-        loanAmount,
-        status,
-      };
-      users.push(newUser);
-      return newUser;
+    deleteUser: async (_: unknown, id: string) => {
+      try {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+          throw new Error("Invalid ObjectId format");
+        }
+        const deletedUser = await FormDatas.findByIdAndDelete(new mongoose.Types.ObjectId(id));
+        if (!deletedUser) {
+          throw new Error("User not found");
+        }
+        return deletedUser;
+      } catch (error: any) {
+        throw new Error(`Error deleting user: ${error.message}`);
+      }
     },
-    updateUser: (_, { id, name, loanAmount, status }) => {
-      const userIndex = users.findIndex((user) => user.id === id);
-      if (userIndex === -1) return null;
+    updateUser: async (
+      _: unknown,
+      { id, input }: { id: string; input: User },
+    ) => {
+      try {
+        // Validate MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+          throw new Error("Invalid user ID");
+        }
 
-      users[userIndex] = {
-        ...users[userIndex],
-        ...(name && { name }),
-        ...(loanAmount && { loanAmount }),
-        ...(status && { status }),
-      };
+        // Find user by ID and update fields
+        const updatedUser = await FormDatas.findByIdAndUpdate(
+          id,
+          { $set: input },
+          // { new: true, runValidators: true }
+        );
 
-      return users[userIndex];
+        if (!updatedUser) {
+          throw new Error("User not found");
+        }
+
+        return updatedUser;
+      } catch (error: any) {
+        throw new Error(`Error updating user: ${error.message}`);
+      }
     },
-    deleteUser: (_, { id }) => {
-      const userIndex = users.findIndex((user) => user.id === id);
-      if (userIndex === -1) return false;
-
-      users.splice(userIndex, 1);
-      return true;
-    },
+    addUser: async (
+      _: unknown,
+      { input }: { input: User }, // ✅ Correctly extract `input`
+    ) => {
+      try { 
+        const newUser = new FormDatas(input);
+        await newUser.save();
+        return newUser;
+      } catch (error: any) {
+        console.error('error---------',error)
+      }
+    }
   },
+  
 };
 
-// Initialize the Apollo Server
+// Initialize the Apollo Server 
 const server = new ApolloServer({
   typeDefs,
   resolvers
 });
-
-
-// async function checkConnection() {
-//   try {
-//     const message = await testDatabaseConnection();
-//     console.log(message); // Outputs: 'Database connection successful'
-//   } catch (error) {
-//     console.error(error.message); // Outputs: 'Database connection failed: <error>'
-//   }
-// }
-
-// checkConnection();
 
 // Start the server
 const { url } = await startStandaloneServer(server, {
   listen: { port: 4000 },
 });
 
-console.log(`🚀 Server ready at: ${url}`);
+try {
+  await dbConnect();
+  console.log(`✔️  Server ready at: ${url}`);
+} catch (error) {
+  console.log('error occured - ', error)
+}

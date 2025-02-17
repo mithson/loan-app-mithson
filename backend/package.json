@@ -1,23 +1,19 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "tsc",
-    "start": "npm run compile && node ./dist/index.js"
-    },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc-watch --onEmitDebounceMs 2000 --onSuccess \"node ./dist/src/index.js "
+  },
   "dependencies": {
-    "@apollo/server": "^4.11.3",
-    "graphql": "^16.10.0"
+    "@apollo/server": "^4.9.1",
+    "dotenv": "^16.4.7",
+    "graphql": "^16.6.0",
+    "mongoose": "^7.4.2",
+    "nodemon": "^3.1.9",
+    "tsc-watch": "^6.2.1"
   },
   "devDependencies": {
-    "@types/node": "^22.12.0",
-    "typescript": "^5.7.3"
+    "@types/node": "^20.11.1",
+    "typescript": "^5.4.0"
   }
 }
