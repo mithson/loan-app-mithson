@@ -169,7 +169,7 @@ const resolvers = {
     },
     addUser: async (
       _: unknown,
-      { input }: { input: User }, // ✅ Correctly extract `input`
+      { input }: { input: User }, 
     ) => {
       try { 
         const newUser = new FormDatas(input);
