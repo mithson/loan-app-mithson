@@ -15,6 +15,9 @@ const userSchema = z.object({
   ),
   status: z.string().min(1, "Status is required"),
 });
+const API_URL =
+  (process.env.NODE_ENV) === "production" ? "https://loan-app-mithson.vercel.app/api/graphql"
+  : "http://localhost:3000/api/graphql";
 
 // ✅ TypeScript Interfaces
 interface User {
@@ -81,7 +84,7 @@ const fetchGraphQL = async <T,>(
   query: string,
   variables: Record<string, unknown> = {}
 ): Promise<T> => {
-  const response = await fetch("http://localhost:3000/api/graphql", {
+  const response = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
