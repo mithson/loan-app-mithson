@@ -1,11 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ApolloServer } from "@apollo/server";
-import { startServerAndCreateNextHandler } from "@as-integrations/next";
+import { ApolloServer } from "apollo-server-micro";
+import { NextApiRequest, NextApiResponse } from "next";
 import dotenv from "dotenv";
-import { dbConnect } from "@/app/api/dbConnect"; // Ensure correct path
-import { FormDatas } from "@/app/api/model/User"; // Ensure correct path
+import { dbConnect } from "../dbConnect"; // Ensure correct path
+import { FormDatas } from "../model/User"; // Ensure correct path
+import Cors from "micro-cors";
+import { RequestHandler } from "next/dist/server/next";
 
 dotenv.config();
+
+// Enable CORS
+const cors = Cors({
+  allowMethods: ["POST", "OPTIONS"],
+});
 
 // GraphQL Schema
 const typeDefs = `#graphql
@@ -80,68 +86,54 @@ const typeDefs = `#graphql
 const resolvers = {
   Query: {
     getAllUsers: async () => {
-      try {
-        await dbConnect(); // Ensure DB connection per request
-        return await FormDatas.find();
-      } catch (error: any) {
-        throw new Error(error.message);
-      }
+      await dbConnect();
+      return await FormDatas.find();
     },
     getUser: async (_: unknown, { id }: { id: string }) => {
-      try {
-        await dbConnect();
-        const user = await FormDatas.findById(id);
-        if (!user) throw new Error("User not found");
-        return user;
-      } catch (error: any) {
-        throw new Error(error.message);
-      }
+      await dbConnect();
+      return await FormDatas.findById(id);
     },
   },
   Mutation: {
     deleteUser: async (_: unknown, { id }: { id: string }) => {
-      try {
-        await dbConnect();
-        const deletedUser = await FormDatas.findByIdAndDelete(id);
-        if (!deletedUser) throw new Error("User not found");
-        return deletedUser;
-      } catch (error: any) {
-        throw new Error(error.message);
-      }
+      await dbConnect();
+      return await FormDatas.findByIdAndDelete(id);
     },
     updateUser: async (_: unknown, { id, input }: { id: string; input: any }) => {
-      try {
-        await dbConnect();
-        const updatedUser = await FormDatas.findByIdAndUpdate(id, input, { new: true });
-        if (!updatedUser) throw new Error("User not found");
-        return updatedUser;
-      } catch (error: any) {
-        throw new Error(error.message);
-      }
+      await dbConnect();
+      return await FormDatas.findByIdAndUpdate(id, input, { new: true });
     },
     addUser: async (_: unknown, { input }: { input: any }) => {
-      try {
-        await dbConnect();
-        const newUser = new FormDatas(input);
-        await newUser.save();
-        return newUser;
-      } catch (error: any) {
-        throw new Error(error.message);
-      }
+      await dbConnect();
+      const newUser = new FormDatas(input);
+      await newUser.save();
+      return newUser;
     },
   },
 };
 
 // Initialize Apollo Server
-const server = new ApolloServer({ typeDefs, resolvers });
+const apolloServer = new ApolloServer({ typeDefs, resolvers });
 
-const handler = startServerAndCreateNextHandler(server);
 
-// ✅ Correct export for Next.js App Router on Vercel
-export async function GET(req: NextRequest) {
-  return handler(req, { cache: "no-store" });
-}
+const startServer = apolloServer.start();
 
-export async function POST(req: NextRequest) {
-  return handler(req, { cache: "no-store" });
-}
+const handler: RequestHandler = async (req, res) => {
+  if (req.method === "OPTIONS") {
+    res.end();
+    return;
+  }
+  await startServer;
+  await apolloServer.createHandler({ path: "/api/graphql" })(req, res);
+};
+
+// Export the handler with CORS applied
+export default cors(handler);
+
+// Disable Next.js body parser (Apollo handles it)
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
