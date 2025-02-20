@@ -1,7 +1,7 @@
 {
     "routes": [
       {
-        "src": "/api/graphql",
+        "src": "app/api/graphql",
         "methods": ["GET", "POST"],
         "dest": "/api/graphql"
       }
