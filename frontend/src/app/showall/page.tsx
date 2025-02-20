@@ -16,7 +16,7 @@ const userSchema = z.object({
   status: z.string().min(1, "Status is required"),
 });
 const API_URL =
-  (process.env.NODE_ENV) === "production" ? "https://loan-app-mithson.vercel.app/api/graphql"
+  (process.env.NODE_ENV) === "production" ? "https://loan-app-mithson.vercel.app/api/graphql" 
   : "http://localhost:3000/api/graphql";
 
 // ✅ TypeScript Interfaces
@@ -223,3 +223,9 @@ export default function UsersLoanApplications() {
     </div>
   );
 }
+
+
+// hosted urls for this project which is deployed in vercel 
+// loan-app-mithson.vercel.app
+// loan-app-mithson-git-main-abhishek-vishwakarmas-projects.vercel.app
+// loan-app-mithson-5vqq65r7a-abhishek-vishwakarmas-projects.vercel.app
