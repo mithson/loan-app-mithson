@@ -1,12 +1,14 @@
+import { NextRequest } from "next/server";
+import { ApolloServer } from "@apollo/server";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
-import { NextRequest, NextResponse } from "next/server";
-import { FormDatas } from "../model/User";
-import { dbConnect } from "../dbConnect";
-import { ApolloServer } from '@apollo/server';
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { dbConnect } from "../dbConnect"; // Ensure correct path
+import { FormDatas } from "../model/User"; // Ensure correct path
 
 dotenv.config();
+
+// Ensure database connection is established before handling requests
+await dbConnect();
 
 // Define GraphQL Schema
 const typeDefs = `#graphql
@@ -77,7 +79,7 @@ const typeDefs = `#graphql
   }
 `;
 
-// Resolvers
+// Define Resolvers
 const resolvers = {
   Query: {
     getAllUsers: async () => {
@@ -89,7 +91,7 @@ const resolvers = {
     },
     getUser: async (_: unknown, { id }: { id: string }) => {
       try {
-        const user = await FormDatas.findById(new mongoose.Types.ObjectId(id));
+        const user = await FormDatas.findById(id);
         if (!user) {
           throw new Error("User not found");
         }
@@ -128,7 +130,7 @@ const resolvers = {
         await newUser.save();
         return newUser;
       } catch (error: any) {
-        console.error("Error:", error);
+        throw new Error(error.message);
       }
     },
   },
@@ -137,9 +139,13 @@ const resolvers = {
 // Initialize Apollo Server
 const server = new ApolloServer({ typeDefs, resolvers });
 
-// Ensure the database connection
-dbConnect();
+const handler = startServerAndCreateNextHandler(server);
 
-const handler = startServerAndCreateNextHandler<NextRequest>(server);
+// ✅ Correctly exporting handlers for Next.js App Router
+export async function GET(req: NextRequest) {
+  return handler(req);
+}
 
-export { handler as GET, handler as POST };
+export async function POST(req: NextRequest) {
+  return handler(req);
+}
