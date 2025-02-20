@@ -1,5 +1,5 @@
 import { ApolloServer } from "apollo-server-micro";
-import { NextApiRequest, NextApiResponse } from "next";
+// import { NextApiRequest, NextApiResponse } from "next";
 import dotenv from "dotenv";
 import { dbConnect } from "../dbConnect"; // Ensure correct path
 import { FormDatas } from "../model/User"; // Ensure correct path
