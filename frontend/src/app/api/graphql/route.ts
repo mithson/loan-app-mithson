@@ -1,16 +1,13 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ApolloServer } from "@apollo/server";
 import { startServerAndCreateNextHandler } from "@as-integrations/next";
 import dotenv from "dotenv";
-import { dbConnect } from "../dbConnect"; // Ensure correct path
-import { FormDatas } from "../model/User"; // Ensure correct path
+import { dbConnect } from "@/app/api/dbConnect"; // Ensure correct path
+import { FormDatas } from "@/app/api/model/User"; // Ensure correct path
 
 dotenv.config();
 
-// Ensure database connection is established before handling requests
-await dbConnect();
-
-// Define GraphQL Schema
+// GraphQL Schema
 const typeDefs = `#graphql
   type User {
     id: ID
@@ -43,7 +40,7 @@ const typeDefs = `#graphql
   }
 
   type Mutation {
-    deleteUser(id: ID): User,
+    deleteUser(id: ID): User
     updateUser(id: ID!, input: UpdateUserInput): User
     addUser(input: addUserInput!): User
   }
@@ -79,11 +76,12 @@ const typeDefs = `#graphql
   }
 `;
 
-// Define Resolvers
+// GraphQL Resolvers
 const resolvers = {
   Query: {
     getAllUsers: async () => {
       try {
+        await dbConnect(); // Ensure DB connection per request
         return await FormDatas.find();
       } catch (error: any) {
         throw new Error(error.message);
@@ -91,10 +89,9 @@ const resolvers = {
     },
     getUser: async (_: unknown, { id }: { id: string }) => {
       try {
+        await dbConnect();
         const user = await FormDatas.findById(id);
-        if (!user) {
-          throw new Error("User not found");
-        }
+        if (!user) throw new Error("User not found");
         return user;
       } catch (error: any) {
         throw new Error(error.message);
@@ -104,10 +101,9 @@ const resolvers = {
   Mutation: {
     deleteUser: async (_: unknown, { id }: { id: string }) => {
       try {
+        await dbConnect();
         const deletedUser = await FormDatas.findByIdAndDelete(id);
-        if (!deletedUser) {
-          throw new Error("User not found");
-        }
+        if (!deletedUser) throw new Error("User not found");
         return deletedUser;
       } catch (error: any) {
         throw new Error(error.message);
@@ -115,10 +111,9 @@ const resolvers = {
     },
     updateUser: async (_: unknown, { id, input }: { id: string; input: any }) => {
       try {
+        await dbConnect();
         const updatedUser = await FormDatas.findByIdAndUpdate(id, input, { new: true });
-        if (!updatedUser) {
-          throw new Error("User not found");
-        }
+        if (!updatedUser) throw new Error("User not found");
         return updatedUser;
       } catch (error: any) {
         throw new Error(error.message);
@@ -126,6 +121,7 @@ const resolvers = {
     },
     addUser: async (_: unknown, { input }: { input: any }) => {
       try {
+        await dbConnect();
         const newUser = new FormDatas(input);
         await newUser.save();
         return newUser;
@@ -141,11 +137,11 @@ const server = new ApolloServer({ typeDefs, resolvers });
 
 const handler = startServerAndCreateNextHandler(server);
 
-// ✅ Correctly exporting handlers for Next.js App Router
+// ✅ Correct export for Next.js App Router on Vercel
 export async function GET(req: NextRequest) {
-  return handler(req);
+  return handler(req, { cache: "no-store" });
 }
 
 export async function POST(req: NextRequest) {
-  return handler(req);
+  return handler(req, { cache: "no-store" });
 }
